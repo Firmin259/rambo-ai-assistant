@@ -5,14 +5,17 @@ const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 
-// Allow all origins to completely bypass preflight CORS blocks
+// 1. MUST BE AT THE ABSOLUTE TOP: Allow all origins and handle preflight checks
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
-// Generous body limits (50mb) to support video and high-res image uploads
+app.options('*', cors()); // Explicitly handle preflight for all routes
+
+// 2. Body parsers with generous limits (50mb) for images and videos
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -36,6 +39,7 @@ app.post('/api/chat', async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
+    // Format chat history with support for text, images, and videos
     const history = messages.slice(0, -1).map(msg => {
       const parts = [];
       if (msg.content) parts.push({ text: msg.content });
