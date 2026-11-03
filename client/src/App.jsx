@@ -5,7 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { collection, addDoc, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import Login from './Login';
 
-// Dynamic backend URL supporting both local development and Vercel/Render production
+// Dynamic backend URL supporting local development and Vercel/Render production
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://rambo-ai-backend.onrender.com';
 
 export default function App() {
@@ -146,7 +146,6 @@ export default function App() {
           return newHistory;
         });
 
-        // FIXED: Uses BACKEND_URL instead of hardcoded localhost:5000
         const response = await fetch(`${BACKEND_URL}/api/generate-image`, {
           method: 'POST',
           headers: { 
@@ -187,7 +186,6 @@ export default function App() {
       } else {
         updatedMessages[updatedMessages.length - 1].mediaUrl = attachedMedia;
 
-        // FIXED: Uses BACKEND_URL properly
         const response = await fetch(`${BACKEND_URL}/api/chat`, {
           method: 'POST',
           headers: { 

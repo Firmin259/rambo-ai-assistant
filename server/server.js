@@ -15,7 +15,7 @@ app.use(cors({
   optionsSuccessStatus: 200
 }));
 
-// Body parsers with generous limits (50mb) for images and videos
+// Body parsers with 50mb limit for base64 image/video uploads
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
