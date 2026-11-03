@@ -4,18 +4,18 @@ require('dotenv').config();
 
 const app = express();
 
-// ==========================================
-// OFFICIAL CORS PACKAGE CONFIGURATION
-// ==========================================
+// Enable CORS for all routes and handle preflight explicit OPTIONS requests immediately
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: true,
-  optionsSuccessStatus: 200
+  credentials: true
 }));
 
-// Body parsers with 50mb limit for base64 image/video uploads
+// Respond immediately 200 OK to all OPTIONS preflight requests
+app.options('*', cors());
+
+// Body parsers
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
