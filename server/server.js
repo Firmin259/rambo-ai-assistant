@@ -5,9 +5,25 @@ const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 
-// 1. ABSOLUTE TOP: Allow all origins and handle preflight checks immediately
+// Allowed origins for production (Vercel) and local testing
+const allowedOrigins = [
+  'https://rambo-ai-assistant.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
+// 1. Correct CORS configuration for credentials + specific origins
 app.use(cors({
-  origin: '*',
+  origin: function (origin, callback) {
+    // Allow non-browser requests (like curl, Postman, or mobile apps)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('Blocked by CORS policy: Origin not allowed'));
+    }
+  },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -24,7 +40,7 @@ const PORT = process.env.PORT || 5000;
 // 3. Safe initialization explicitly passing the API key from environment variables
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Health check endpoint so you can verify in browser if Render is online
+// Health check endpoint
 app.get('/', (req, res) => {
   res.status(200).send('Rambo AI Backend is live and running!');
 });
