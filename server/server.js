@@ -5,25 +5,9 @@ const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 
-// Allowed origins for production (Vercel) and local testing
-const allowedOrigins = [
-  'https://rambo-ai-assistant.vercel.app',
-  'http://localhost:5173',
-  'http://localhost:3000'
-];
-
-// 1. Correct CORS configuration for credentials + specific origins
+// 1. FIXED CORS: 'origin: true' allows credentials safely with any frontend origin
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow non-browser requests (like curl, Postman, or mobile apps)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-      callback(null, true);
-    } else {
-      callback(new Error('Blocked by CORS policy: Origin not allowed'));
-    }
-  },
+  origin: true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
