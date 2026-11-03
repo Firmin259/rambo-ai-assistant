@@ -5,9 +5,12 @@ const { GoogleGenAI } = require('@google/genai');
 const app = express();
 
 // ==========================================
-// FOOLPROOF MANUAL CORS MIDDLEWARE
+// FOOLPROOF MANUAL CORS + REQUEST LOGGER
 // ==========================================
 app.use((req, res, next) => {
+  // This log will show up in your Render dashboard logs
+  console.log(`[Incoming Request] ${req.method} ${req.url} from origin: ${req.headers.origin || 'unknown'}`);
+
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -49,6 +52,7 @@ app.post('/api/chat', async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
+    // Format chat history with support for text, images, and videos
     const history = messages.slice(0, -1).map(msg => {
       const parts = [];
       if (msg.content) parts.push({ text: msg.content });
