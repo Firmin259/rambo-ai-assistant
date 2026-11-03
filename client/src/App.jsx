@@ -5,9 +5,12 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { collection, addDoc, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import Login from './Login';
 
-// Clean and sanitize the backend URL to prevent relative route prepending or trailing slash issues
+// Aggressive URL sanitization to strip brackets, quotes, and prevent Vercel domain prepending
 const rawUrl = import.meta.env.VITE_BACKEND_URL || 'https://rambo-ai-backend.onrender.com';
-const BACKEND_URL = rawUrl.trim().replace(/\/+$/, '');
+const cleanUrl = rawUrl.replace(/[\[\]"]/g, '').trim();
+const BACKEND_URL = cleanUrl.startsWith('http') 
+  ? cleanUrl.replace(/\/+$/, '') 
+  : `https://${cleanUrl.replace(/\/+$/, '')}`;
 
 export default function App() {
   const [user, setUser] = useState(null);
