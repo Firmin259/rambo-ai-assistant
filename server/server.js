@@ -8,7 +8,6 @@ const app = express();
 // FOOLPROOF MANUAL CORS + REQUEST LOGGER
 // ==========================================
 app.use((req, res, next) => {
-  // This log will show up in your Render dashboard logs
   console.log(`[Incoming Request] ${req.method} ${req.url} from origin: ${req.headers.origin || 'unknown'}`);
 
   res.setHeader('Access-Control-Allow-Origin', '*');
