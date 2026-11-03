@@ -5,6 +5,9 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { collection, addDoc, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import Login from './Login';
 
+// Dynamic backend URL supporting both local development and Vercel/Render production
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://rambo-ai-backend.onrender.com';
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
@@ -143,7 +146,8 @@ export default function App() {
           return newHistory;
         });
 
-        const response = await fetch('http://localhost:5000/api/generate-image', {
+        // FIXED: Uses BACKEND_URL instead of hardcoded localhost:5000
+        const response = await fetch(`${BACKEND_URL}/api/generate-image`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -153,7 +157,7 @@ export default function App() {
         });
 
         const data = await response.json();
-        if (data.imageUrl) {
+        if (response.ok && data.imageUrl) {
           const finalMessages = [...updatedMessages, { 
             role: 'assistant', 
             content: `Here is your requested character/image based on: "${userPrompt}"`,
@@ -183,7 +187,8 @@ export default function App() {
       } else {
         updatedMessages[updatedMessages.length - 1].mediaUrl = attachedMedia;
 
-const response = await fetch('https://rambo-ai-backend.onrender.com/api/chat', {
+        // FIXED: Uses BACKEND_URL properly
+        const response = await fetch(`${BACKEND_URL}/api/chat`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -249,7 +254,7 @@ const response = await fetch('https://rambo-ai-backend.onrender.com/api/chat', {
       console.error('Request processing error:', error);
       setMessages(prev => {
         const newHistory = [...prev];
-        newHistory[newHistory.length - 1].content = '⚠️ Could not process request.';
+        newHistory[newHistory.length - 1].content = `⚠️ Could not process request: ${error.message}`;
         return newHistory;
       });
     } finally {
