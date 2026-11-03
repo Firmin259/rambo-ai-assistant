@@ -5,27 +5,11 @@ const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 
-// Allowed origins for CORS (Production Vercel app + Local development)
-const allowedOrigins = [
-  'https://rambo-ai-assistant.vercel.app',
-  'http://localhost:5173',
-  'http://localhost:3000'
-];
-
+// Allow all origins to completely bypass preflight CORS blocks
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, or server-to-server)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Generous body limits (50mb) to support video and high-res image uploads
@@ -52,7 +36,6 @@ app.post('/api/chat', async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    // Format chat history with support for text, images, and videos
     const history = messages.slice(0, -1).map(msg => {
       const parts = [];
       if (msg.content) parts.push({ text: msg.content });
