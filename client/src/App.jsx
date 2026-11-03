@@ -5,8 +5,9 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { collection, addDoc, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import Login from './Login';
 
-// Dynamic backend URL supporting local development and Vercel/Render production
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://rambo-ai-backend.onrender.com';
+// Clean and sanitize the backend URL to prevent relative route prepending or trailing slash issues
+const rawUrl = import.meta.env.VITE_BACKEND_URL || 'https://rambo-ai-backend.onrender.com';
+const BACKEND_URL = rawUrl.trim().replace(/\/+$/, '');
 
 export default function App() {
   const [user, setUser] = useState(null);
