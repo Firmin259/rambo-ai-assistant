@@ -45,7 +45,7 @@ export default function Login() {
           <div className="p-3 bg-indigo-600 rounded-2xl mb-3 shadow-lg shadow-indigo-500/30">
             <Bot className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold">Gemini AI Clone</h1>
+          <h1 className="text-2xl font-bold"> Rambo AI</h1>
           <p className="text-sm text-slate-400 mt-1">
             {isSignUp ? 'Create your account to start chatting' : 'Sign in to continue to AI Chat'}
           </p>
