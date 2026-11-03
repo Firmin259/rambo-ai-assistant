@@ -5,7 +5,7 @@ const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 
-// 1. MUST BE AT THE ABSOLUTE TOP: Allow all origins and handle preflight checks
+// 1. ABSOLUTE TOP: Allow all origins and handle preflight checks immediately
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -13,14 +13,21 @@ app.use(cors({
   credentials: true
 }));
 
-app.options('*', cors()); // Explicitly handle preflight for all routes
+app.options('*', cors());
 
 // 2. Body parsers with generous limits (50mb) for images and videos
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const PORT = process.env.PORT || 5000;
-const ai = new GoogleGenAI({});
+
+// 3. Safe initialization explicitly passing the API key from environment variables
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// Health check endpoint so you can verify in browser if Render is online
+app.get('/', (req, res) => {
+  res.status(200).send('Rambo AI Backend is live and running!');
+});
 
 // Text & Multimodal (Image/Video) Chat Streaming Endpoint
 app.post('/api/chat', async (req, res) => {
