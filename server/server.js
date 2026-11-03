@@ -1,27 +1,30 @@
 const express = require('express');
-const cors = require('cors');
 require('dotenv').config();
 const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 
-// 1. FIXED CORS: 'origin: true' allows credentials safely with any frontend origin
-app.use(cors({
-  origin: true,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+// ==========================================
+// FOOLPROOF MANUAL CORS MIDDLEWARE
+// ==========================================
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-app.options('*', cors());
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
 
-// 2. Body parsers with generous limits (50mb) for images and videos
+// Body parsers with generous limits (50mb) for images and videos
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const PORT = process.env.PORT || 5000;
-
-// 3. Safe initialization explicitly passing the API key from environment variables
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // Health check endpoint
@@ -46,7 +49,6 @@ app.post('/api/chat', async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    // Format chat history with support for text, images, and videos
     const history = messages.slice(0, -1).map(msg => {
       const parts = [];
       if (msg.content) parts.push({ text: msg.content });
