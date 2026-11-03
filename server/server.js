@@ -4,9 +4,7 @@ require('dotenv').config();
 
 const app = express();
 
-// ==========================================
-// OFFICIAL CORS PACKAGE CONFIGURATION
-// ==========================================
+// Absolute, robust CORS configuration
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
