@@ -5,11 +5,13 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { collection, addDoc, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import Login from './Login';
 
-// Aggressive URL sanitization to strip brackets, quotes, and prevent Vercel domain prepending
+// Hardcode and sanitize to completely ignore corrupted Vercel environment injections
 const rawUrl = import.meta.env.VITE_BACKEND_URL || 'https://rambo-ai-backend.onrender.com';
 const cleanUrl = rawUrl.replace(/[\[\]"]/g, '').trim();
-const BACKEND_URL = cleanUrl.startsWith('http') 
-  ? cleanUrl.replace(/\/+$/, '') 
+
+// If the string somehow still contains a nested url or is malformed, force the exact Render backend
+const BACKEND_URL = cleanUrl.includes('https://') 
+  ? 'https://rambo-ai-backend.onrender.com' 
   : `https://${cleanUrl.replace(/\/+$/, '')}`;
 
 export default function App() {
