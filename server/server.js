@@ -1,6 +1,5 @@
 const express = require('express');
 require('dotenv').config();
-const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 
@@ -22,21 +21,34 @@ app.use((req, res, next) => {
   next();
 });
 
-// Body parsers with generous limits (50mb) for images and videos
+// Body parsers with generous limits (50mb)
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const PORT = process.env.PORT || 5000;
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// Lazy-load Google Gen AI SDK safely so it never crashes startup
+let ai = null;
+try {
+  const { GoogleGenAI } = require('@google/genai');
+  ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  console.log('GoogleGenAI initialized successfully.');
+} catch (err) {
+  console.error('Failed to initialize GoogleGenAI SDK:', err.message);
+}
 
 // Health check endpoint
 app.get('/', (req, res) => {
   res.status(200).send('Rambo AI Backend is live and running!');
 });
 
-// Text & Multimodal (Image/Video) Chat Streaming Endpoint
+// Text & Multimodal Chat Streaming Endpoint
 app.post('/api/chat', async (req, res) => {
   try {
+    if (!ai) {
+      return res.status(500).json({ error: 'AI SDK not initialized on server' });
+    }
+
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Unauthorized: No token provided' });
@@ -51,7 +63,6 @@ app.post('/api/chat', async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    // Format chat history with support for text, images, and videos
     const history = messages.slice(0, -1).map(msg => {
       const parts = [];
       if (msg.content) parts.push({ text: msg.content });
@@ -112,9 +123,13 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Image & Character Generation Endpoint
+// Image Generation Endpoint
 app.post('/api/generate-image', async (req, res) => {
   try {
+    if (!ai) {
+      return res.status(500).json({ error: 'AI SDK not initialized on server' });
+    }
+
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Unauthorized: No token provided' });
@@ -160,5 +175,5 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`AI Backend server running on port ${PORT}`);
+  console.log(`AI Backend server running smoothly on port ${PORT}`);
 });
